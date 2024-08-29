@@ -1,6 +1,9 @@
+import { z } from "zod";
+import { and, eq } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { carts } from '../../db/schema';
-import { z } from 'zod';
+import { carts, products } from "~/server/db/schema";
+import { auth } from "@clerk/nextjs/server";
+
 
 export const cartRouter = createTRPCRouter({
     // Hello World Procedure
@@ -12,17 +15,128 @@ export const cartRouter = createTRPCRouter({
       };
     }),
 
-   // Create Cart Item Procedure
-   create: publicProcedure
-   .input(z.object({
-     productId: z.number().int(),
-     quantity: z.number().int().positive(),
-   }))
-   .mutation(async ({ ctx, input }) => {
-     await ctx.db.insert(carts).values({
-       productId: input.productId,
-       quantity: input.quantity,
-     });
-     return { success: true };
-   }),
+  // Add Item to Cart
+  addItem: publicProcedure
+    .input(z.object({
+      productId: z.number().int().positive(),
+      quantity: z.number().int().positive().default(1),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const user = auth();
+
+      if (!user.userId) {
+        throw new Error("User not authenticated");
+      }
+
+      const existingItems = await ctx.db
+      .select({
+        id: carts.id,
+        productId: carts.productId,
+        quantity: carts.quantity,
+        userId: carts.userId,
+      })
+      .from(carts)
+      .where(and(eq(carts.productId, input.productId), eq(carts.userId, user.userId)))
+      .limit(1);
+
+    // Access the first item from the array
+    const existingItem = existingItems[0];
+
+    if (existingItem) {
+      await ctx.db
+        .update(carts)
+        .set({ quantity: existingItem.quantity + input.quantity })
+        .where(eq(carts.id, existingItem.id));
+    } else {
+      await ctx.db.insert(carts).values({
+        productId: input.productId,
+        quantity: input.quantity,
+        userId: user.userId,
+      });
+    }
+
+      return { success: true };
+    }),
+
+  // Modify Item Quantity in Cart
+  updateQuantity: publicProcedure
+    .input(z.object({
+      cartItemId: z.number().int().positive(),
+      quantity: z.number().int().positive(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const user = auth();
+
+      if (!user.userId) {
+        throw new Error("User not authenticated");
+      }
+
+      const existingItem = await ctx.db
+        .select()
+        .from(carts)
+        .where(and(eq(carts.id, input.cartItemId), eq(carts.userId, user.userId)))
+        .limit(1);
+
+      if (!existingItem) {
+        throw new Error("Item not found in cart");
+      }
+
+      await ctx.db
+        .update(carts)
+        .set({ quantity: input.quantity })
+        .where(eq(carts.id, input.cartItemId));
+
+      return { success: true };
+    }),
+
+  // Delete Item from Cart
+  deleteItem: publicProcedure
+    .input(z.object({
+      cartItemId: z.number().int().positive(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const user = auth();
+
+      if (!user.userId) {
+        throw new Error("User not authenticated");
+      }
+
+      const result = await ctx.db
+        .delete(carts)
+        .where(and(eq(carts.id, input.cartItemId), eq(carts.userId, user.userId)));
+
+      if (result.count === 0) {
+        throw new Error("Item not found in cart");
+      }
+
+      return { success: true };
+    }),
+
+  // Get Cart Items
+  getCart: publicProcedure
+    .query(async ({ ctx }) => {
+      const user = auth();
+
+      if (!user.userId) {
+        throw new Error("User not authenticated");
+      }
+
+      const cartItems = await ctx.db
+        .select({
+          id: carts.id,
+          quantity: carts.quantity,
+          product: {
+            id: products.id,
+            name: products.name,
+            description: products.description,
+            price: products.price,
+            imageUrl: products.imageUrl,
+          }
+        })
+        .from(carts)
+        .leftJoin(products, eq(carts.productId, products.id))
+        .where(eq(carts.userId, user.userId));
+
+      return cartItems;
+    }),
 });

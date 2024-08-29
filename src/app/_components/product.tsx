@@ -4,13 +4,19 @@ import { useState } from "react";
 
 import { api } from "~/trpc/react";
 
-export function LatestProduct() {
+export function ProductComponent() {
 
   const utils = api.useUtils();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);
   const [imageUrl, setImageUrl] = useState("");
+
+  // const getAllProducts = api.product.getAll.useQuery();
+  // const getProductById = api.product.getById.useQuery({ id: 2 });
+
+  // const updateProduct = api.product.update.useMutation();
+  // const deleteProduct = api.product.delete.useMutation();
 
   const createProduct = api.product.create.useMutation({
     onSuccess: async () => {
@@ -21,6 +27,17 @@ export function LatestProduct() {
       setImageUrl("");
     },
   });
+
+  // const handleUpdate = () => {
+  //   updateProduct.mutate({
+  //     id: 1,
+  //     name: 'Updated Product',
+  //   });
+  // };
+
+  // const handleDelete = () => {
+  //   deleteProduct.mutate({ id: 1 });
+  // };
 
   return (
     <div className="w-full max-w-xs">

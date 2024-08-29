@@ -37,4 +37,5 @@ export const carts = pgTable('carts', {
   id: serial('id').primaryKey(),
   productId: integer('product_id').notNull().references(() => products.id),
   quantity: integer('quantity').notNull(),
+  userId: varchar("userId", { length: 256 }).notNull(),
 });

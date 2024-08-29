@@ -1,5 +1,6 @@
-import { LatestProduct } from "~/app/_components/product";
+import { ProductComponent } from "~/app/_components/product";
 import { api, HydrateClient } from "~/trpc/server";
+import CartComponent from "./_components/cart";
 
 export default async function Home() {
   const hello = await api.product.hello({ text: "from tRPC" });
@@ -23,7 +24,8 @@ export default async function Home() {
             </p>
           </div>
 
-          <LatestProduct />
+          <ProductComponent />
+          <CartComponent />
         </div>
       </main>
     </HydrateClient>
