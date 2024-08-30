@@ -1,10 +1,15 @@
-import { useRouter } from "next/router";
-import { api } from "~/trpc/react"; // Adjust the import based on your trpc client setup
+import ProductDetailsClient from './ProductDetailsClient';
 
 export default function ProductDetails({ 
   params,
 }: {
-  params: { productId : string }
+  params: { productId: string }
 }) {
- return (<h1>Details about product {params.productId}</h1>)
+  const productId = Number(params.productId);
+
+  return (
+    <div>
+      <ProductDetailsClient productId={productId} />
+    </div>
+  );
 }

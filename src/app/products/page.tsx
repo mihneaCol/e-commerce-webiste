@@ -1,8 +1,10 @@
-"use client"; // Ensure this component runs on the client side
+'use client'; // Ensure this component runs on the client side
 
 import { useState } from "react";
 import { api } from "~/trpc/react"; // Adjust the import based on your trpc client setup
-import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card"; // Adjust the path if necessary
+import { Button } from '~/components/ui/button';
+import { Typography } from '~/components/ui/typography';
 import Link from "next/link";
 
 const ProductsPage = () => {
@@ -34,25 +36,37 @@ const ProductsPage = () => {
   }
 
   return (
-    <div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5em", margin: "1em" }}>
+    <div className="flex justify-center p-6">
+      <div className="flex flex-wrap gap-6 max-w-5xl w-full">
         {products.map((product) => (
-          <div
+          <Card
             key={product.id}
-            style={{
-              border: "1px solid #ccc",
-              padding: "1em",
-              width: "14.25em",
-              textAlign: "center",
-            }}
+            className="flex flex-col w-full max-w-xs p-4 shadow-lg"
           >
-            <h3>{product.name}</h3>
             <Link href={`/products/${product.id}`}>
-              <img src={product.imageUrl}/>
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-full h-auto rounded-lg"
+              />
             </Link>
-            <p>{product.price} lei</p>
-            <Button onClick={() => handleAddToCart(product.id)}>Add to Cart</Button>
-          </div>
+            <div className="flex flex-col flex-grow mt-4">
+              <Typography variant="h3" className="text-xl font-semibold mb-2">
+                {product.name}
+              </Typography>
+              <Typography variant="body1" className="text-gray-700 mb-4">
+                {product.price} lei
+              </Typography>
+              <div className="mt-auto">
+                <Button
+                  onClick={() => handleAddToCart(product.id)}
+                  className="w-full"
+                >
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
     </div>
