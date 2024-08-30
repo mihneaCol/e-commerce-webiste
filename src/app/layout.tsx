@@ -9,7 +9,6 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { TopNav } from "./_components/topnav";
-import CartComponent from "./_components/cart";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -28,6 +27,13 @@ export default function RootLayout({
   return (
     <ClerkProvider>
         <html lang="en" className={`${GeistSans.variable}`}>
+        <head>
+          {/* Google Fonts */}
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap"
+          />
+        </head>
         <body
           className={cn(
             "min-h-screen bg-background font-sans antialiased",

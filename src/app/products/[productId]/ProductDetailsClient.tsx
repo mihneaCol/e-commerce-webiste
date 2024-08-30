@@ -27,7 +27,7 @@ export default function ProductDetailsClient({ productId }: { productId: number 
               {product.description || 'No description available'}
             </Typography>
             <Typography variant="h2" className="text-2xl font-semibold mb-4">
-              Price: ${product.price}
+              Price: {product.price} lei
             </Typography>
             <Button className="w-full md:w-auto">
               Add to Cart

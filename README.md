@@ -2,6 +2,6 @@
 
 ## TO DO:
 
-- [] Create Product Page
-- [] Create Cart Page
+- [x] Create Product Page
+- [X] Create Cart Page
 - [] Add checkout
