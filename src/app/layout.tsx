@@ -1,4 +1,6 @@
 import "~/styles/globals.css";
+import { Inter as FontSans } from "next/font/google"
+import { cn } from "~/lib/utils";
 import {
   ClerkProvider,
 } from '@clerk/nextjs'
@@ -15,13 +17,23 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
         <html lang="en" className={`${GeistSans.variable}`}>
-        <body>
+        <body
+          className={cn(
+            "min-h-screen bg-background font-sans antialiased",
+            fontSans.variable
+          )}
+        >
           <TopNav />
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </body>

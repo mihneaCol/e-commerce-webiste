@@ -33,7 +33,7 @@ const CartComponent = () => {
 
   const handleAddItem = () => {
     if (productId !== null) {
-      addItemMutation.mutate({ productId, quantity });
+      addItemMutation.mutate({ productId });
     }
   };
 
@@ -79,6 +79,7 @@ const CartComponent = () => {
                     <p>Description: {item.product.description ?? "No description available"}</p>
                     <p>Price: ${item.product.price}</p>
                     <p>Quantity: {item.quantity}</p>
+                    <img src={item.product.imageUrl} />
                     <button
                         onClick={() =>
                         handleUpdateQuantity(item.id, item.quantity + 1)

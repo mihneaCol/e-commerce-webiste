@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { api } from "~/trpc/react";
 
-export function ProductComponent() {
+export default function ProductComponent() {
 
   const utils = api.useUtils();
   const [name, setName] = useState("");
@@ -40,7 +40,7 @@ export function ProductComponent() {
   // };
 
   return (
-    <div className="w-full max-w-xs">
+    <div className="w-full max-w-xs text-black">
       <form
         onSubmit={(e) => {
           e.preventDefault();
