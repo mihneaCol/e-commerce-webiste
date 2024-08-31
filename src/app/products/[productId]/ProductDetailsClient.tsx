@@ -2,14 +2,39 @@
 
 import { Button } from '~/components/ui/button';
 import { Typography } from '~/components/ui/typography';
-import { api } from '~/trpc/react'; // Adjust based on your structure
+import { api } from '~/trpc/react';
+import { toast } from 'sonner';
+import { Spinner } from '~/components/ui/spinner';
 
 export default function ProductDetailsClient({ productId }: { productId: number }) {
+
   const { data: product, isLoading, isError } = api.product.getById.useQuery(
     { id: productId }
   );
 
-  if (isLoading) return <p>Loading product details...</p>;
+  const addItemMutation = api.cart.addItem.useMutation({
+    onSuccess: () => {
+      toast('Product added to cart successfully!');
+    },
+    onError: () => {
+      toast('Failed to add product to cart.');
+    },
+  });
+
+  const handleAddToCart = () => {
+    if (product) {
+      addItemMutation.mutate({ productId: product.id });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner />
+      </div>
+    );
+  }
+
   if (isError || !product) return <p>Product not found or failed to load.</p>;
 
   return (
@@ -29,7 +54,7 @@ export default function ProductDetailsClient({ productId }: { productId: number 
             <Typography variant="h2" className="text-2xl font-semibold mb-4">
               Price: {product.price} lei
             </Typography>
-            <Button className="w-full md:w-auto">
+            <Button className="w-full md:w-auto" onClick={handleAddToCart}>
               Add to Cart
             </Button>
           </div>

@@ -1,11 +1,12 @@
 'use client'; // Ensure this component runs on the client side
 
-import { useState } from "react";
+import { toast } from "sonner";
 import { api } from "~/trpc/react"; // Adjust the import based on your trpc client setup
 import { Card } from "~/components/ui/card"; // Adjust the path if necessary
 import { Button } from '~/components/ui/button';
 import { Typography } from '~/components/ui/typography';
 import Link from "next/link";
+import { Spinner } from "~/components/ui/spinner";
 
 const ProductsPage = () => {
   // Fetch all products
@@ -14,10 +15,10 @@ const ProductsPage = () => {
   // Add an item to the cart
   const addItemMutation = api.cart.addItem.useMutation({
     onSuccess: () => {
-      alert('Product added to cart successfully!');
+      toast('Product added to cart successfully!');
     },
     onError: () => {
-      alert('Failed to add product to cart.');
+      toast('Failed to add product to cart.');
     }
   });
 
@@ -28,7 +29,11 @@ const ProductsPage = () => {
   };
 
   if (isLoading) {
-    return <p>Loading products...</p>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner /> 
+      </div>
+    );
   }
 
   if (isError || !products) {
