@@ -28,8 +28,10 @@ export const products = pgTable('products', {
   price: integer('price').notNull(),
   imageUrl: varchar('image_url', { length: 1024 }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
-  .default(sql`CURRENT_TIMESTAMP`)
-  .notNull()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  stock: integer('stock').notNull().default(0),
+  categoryId: integer('category_id').references(() => categories.id) // Foreign key to categories
 });
 
 // Carts Table
@@ -39,3 +41,10 @@ export const carts = pgTable('carts', {
   quantity: integer('quantity').notNull(),
   userId: varchar("userId", { length: 256 }).notNull(),
 });
+
+// Categories Table
+export const categories = pgTable('categories', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull().unique()
+});
+
