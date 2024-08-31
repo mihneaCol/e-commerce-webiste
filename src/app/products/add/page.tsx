@@ -11,12 +11,8 @@ export default function ProductComponent() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);
   const [imageUrl, setImageUrl] = useState("");
-
-  // const getAllProducts = api.product.getAll.useQuery();
-  // const getProductById = api.product.getById.useQuery({ id: 2 });
-
-  // const updateProduct = api.product.update.useMutation();
-  // const deleteProduct = api.product.delete.useMutation();
+  const [stock, setStock] = useState(0);
+  const [category, setCategory] = useState("");
 
   const createProduct = api.product.create.useMutation({
     onSuccess: async () => {
@@ -25,26 +21,17 @@ export default function ProductComponent() {
       setDescription("");
       setPrice(0);
       setImageUrl("");
+      setStock(0);
+      setCategory("");
     },
   });
-
-  // const handleUpdate = () => {
-  //   updateProduct.mutate({
-  //     id: 1,
-  //     name: 'Updated Product',
-  //   });
-  // };
-
-  // const handleDelete = () => {
-  //   deleteProduct.mutate({ id: 1 });
-  // };
 
   return (
     <div className="w-full max-w-xs text-black">
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          createProduct.mutate({ name, description, price, imageUrl });
+          createProduct.mutate({ name, description, price, imageUrl, stock, category });
         }}
         className="flex flex-col gap-2"
       >
@@ -69,6 +56,22 @@ export default function ProductComponent() {
           placeholder="Price"
           value={price}
           onChange={(e) => setPrice(parseInt(e.target.value))}
+          className="w-full rounded-full px-4 py-2 text-black"
+        />
+
+        <input
+          type="number"
+          placeholder="Stock"
+          value={stock}
+          onChange={(e) => setStock(parseInt(e.target.value))}
+          className="w-full rounded-full px-4 py-2 text-black"
+        />
+
+        <input
+          type="text"
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           className="w-full rounded-full px-4 py-2 text-black"
         />
 

@@ -31,7 +31,7 @@ export const products = pgTable('products', {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   stock: integer('stock').notNull().default(0),
-  categoryId: integer('category_id').references(() => categories.id) // Foreign key to categories
+  category: varchar('category', { length: 255 })
 });
 
 // Carts Table
@@ -40,11 +40,5 @@ export const carts = pgTable('carts', {
   productId: integer('product_id').notNull().references(() => products.id),
   quantity: integer('quantity').notNull(),
   userId: varchar("userId", { length: 256 }).notNull(),
-});
-
-// Categories Table
-export const categories = pgTable('categories', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull().unique()
 });
 

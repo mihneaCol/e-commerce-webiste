@@ -4,7 +4,6 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { products } from "~/server/db/schema";
 
 export const productRouter = createTRPCRouter({
-  // Hello World Procedure
   hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {
@@ -13,13 +12,14 @@ export const productRouter = createTRPCRouter({
       };
     }),
 
-  // Create Product Procedure
   create: publicProcedure
     .input(z.object({
       name: z.string().min(1),
       description: z.string().min(1),
       price: z.number().positive(),
       imageUrl: z.string().url(),
+      stock: z.number().nonnegative(), 
+      category: z.string().min(1),
     }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(products).values({
@@ -27,18 +27,17 @@ export const productRouter = createTRPCRouter({
         description: input.description,
         price: input.price,
         imageUrl: input.imageUrl,
+        stock: input.stock,
+        category: input.category,
       });
       return { success: true };
     }),
 
-  // Get Products
-  getAll: publicProcedure
-  .query(async ({ ctx }) => {
+  getAll: publicProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.select().from(products);
     return result;
   }),
 
-  // Get a Single Product by ID
   getById: publicProcedure
     .input(z.object({
       id: z.number().int().positive(),
@@ -56,36 +55,38 @@ export const productRouter = createTRPCRouter({
       return result;
     }),
 
-    // Update Product
   update: publicProcedure
-  .input(z.object({
-    id: z.number().int().positive(),
-    name: z.string().min(1).optional(),
-    description: z.string().min(1).optional(),
-    price: z.number().positive().optional(),
-    imageUrl: z.string().url().optional(),
-  }))
-  .mutation(async ({ ctx, input }) => {
-    const updateValues: Partial<typeof input> = {};
-    if (input.name) updateValues.name = input.name;
-    if (input.description) updateValues.description = input.description;
-    if (input.price) updateValues.price = input.price;
-    if (input.imageUrl) updateValues.imageUrl = input.imageUrl;
+    .input(z.object({
+      id: z.number().int().positive(),
+      name: z.string().min(1).optional(),
+      description: z.string().min(1).optional(),
+      price: z.number().positive().optional(),
+      imageUrl: z.string().url().optional(),
+      stock: z.number().nonnegative().optional(),
+      category: z.string().min(1).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const updateValues: Partial<typeof input> = {};
+      if (input.name) updateValues.name = input.name;
+      if (input.description) updateValues.description = input.description;
+      if (input.price) updateValues.price = input.price;
+      if (input.imageUrl) updateValues.imageUrl = input.imageUrl;
+      if (input.stock !== undefined) updateValues.stock = input.stock; 
+      if (input.category !== undefined) updateValues.category = input.category;
 
-    const [result] = await ctx.db
-      .update(products)
-      .set(updateValues)
-      .where(eq(products.id, input.id))
-      .returning();
+      const [result] = await ctx.db
+        .update(products)
+        .set(updateValues)
+        .where(eq(products.id, input.id))
+        .returning();
 
-    if (!result) {
-      throw new Error('Product not found');
-    }
+      if (!result) {
+        throw new Error('Product not found');
+      }
 
-    return result;
-  }),
+      return result;
+    }),
 
-  // Delete Product
   delete: publicProcedure
     .input(z.object({
       id: z.number().int().positive(),

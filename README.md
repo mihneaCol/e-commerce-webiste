@@ -4,9 +4,8 @@
 
 - [x] Create Product Page
 - [X] Create Cart Page
-- [] Add product stocks
+- [x] Add product stocks and categories
+- [x] Add searchbar
 - [] Add product filtering
 - [] Add checkout
-- [] Add searchbar
-- [] Add category propriety for products (optional)
 - [] Add Orders Page (optional)
