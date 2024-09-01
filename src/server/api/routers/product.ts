@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { products } from "~/server/db/schema";
 
@@ -33,10 +33,20 @@ export const productRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const result = await ctx.db.select().from(products);
-    return result;
-  }),
+    getAll: publicProcedure
+    .input(z.object({
+      categories: z.array(z.string()).optional(), // Array of category filters
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      const query = ctx.db.select().from(products);
+
+      if (input?.categories?.length) {
+        query.where(inArray(products.category, input.categories));
+      }
+
+      const result = await query;
+      return result;
+    }),
 
   getById: publicProcedure
     .input(z.object({

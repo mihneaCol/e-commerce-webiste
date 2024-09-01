@@ -1,3 +1,4 @@
+// src/app/products/page.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -10,7 +11,10 @@ import Link from 'next/link';
 import { Spinner } from '~/components/ui/spinner';
 
 const ProductsPage = () => {
-  const { data: products, isLoading, isError } = api.product.getAll.useQuery();
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const { data: products, isLoading, isError } = api.product.getAll.useQuery({
+    categories: selectedCategories.length ? selectedCategories : undefined,
+  });
   const [visibleCount, setVisibleCount] = useState(9);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -21,7 +25,6 @@ const ProductsPage = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        console.log("Observer triggered:", entries[0]?.isIntersecting);
         if (entries[0]?.isIntersecting) {
           loadMore();
         }
@@ -30,17 +33,15 @@ const ProductsPage = () => {
     );
   
     if (loadMoreRef.current) {
-      console.log("Observer attached");
       observer.observe(loadMoreRef.current);
     }
   
     return () => {
       if (loadMoreRef.current) {
         observer.unobserve(loadMoreRef.current);
-        console.log("Observer detached");
       }
     };
-  }, []);  // Empty dependency array
+  }, []);
 
   const addItemMutation = api.cart.addItem.useMutation({
     onSuccess: () => {
@@ -57,6 +58,16 @@ const ProductsPage = () => {
     }
   };
 
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prevCategories) =>
+      prevCategories.includes(category)
+        ? prevCategories.filter((cat) => cat !== category)
+        : [...prevCategories, category]
+    );
+  };
+
+  const availableCategories = ['Cooling', 'Processors', 'PSU', 'Storage', 'Graphics Card'];
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -71,6 +82,22 @@ const ProductsPage = () => {
 
   return (
     <div className="flex flex-col items-center p-6">
+      {/* Category Filters */}
+      <div className="mb-6">
+        <div className="flex space-x-2">
+          {availableCategories.map((category) => (
+            <Button
+              key={category}
+              variant={selectedCategories.includes(category) ? 'secondary' : 'outline'}
+              onClick={() => toggleCategory(category)}
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Product Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-5xl w-full">
         {products.slice(0, visibleCount).map((product) => (
           <Card
@@ -103,6 +130,8 @@ const ProductsPage = () => {
           </Card>
         ))}
       </div>
+
+      {/* Load More */}
       {visibleCount < products.length && (
         <div ref={loadMoreRef} className="h-16 w-full"></div>
       )}
