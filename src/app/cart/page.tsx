@@ -6,11 +6,18 @@ import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
 import { toast } from "sonner";
 import { Spinner } from "~/components/ui/spinner";
+import { useState } from "react";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import CheckoutForm from "~/components/CheckoutForm";
 
-const CartPage = () => {
-    
+// Make sure to replace with your actual publishable key
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
+export default function CartPage() {
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const { data: cartItems, isLoading, isError, refetch } = api.cart.getCart.useQuery();
-  
+
   const updateQuantityMutation = api.cart.updateQuantity.useMutation({
     onSuccess: () => {
       refetch();
@@ -117,6 +124,9 @@ const CartPage = () => {
               <Typography variant="h3" className="text-xl font-bold">
                 Total: {totalPrice} lei
               </Typography>
+              <Button onClick={() => setShowCheckoutForm(true)} className="w-full md:w-auto">
+                Buy Now
+              </Button>
             </div>
           </>
         ) : (
@@ -125,8 +135,15 @@ const CartPage = () => {
           </Typography>
         )}
       </div>
+      {showCheckoutForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <Elements stripe={stripePromise}>
+              <CheckoutForm onClose={() => setShowCheckoutForm(false)} totalPrice={totalPrice} />
+            </Elements>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-export default CartPage;
+}

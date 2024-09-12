@@ -45,10 +45,10 @@ const ProductsPage = () => {
 
   const addItemMutation = api.cart.addItem.useMutation({
     onSuccess: () => {
-      toast('Product added to cart successfully!');
+      toast.success('Product added to cart successfully!');
     },
     onError: () => {
-      toast('Failed to add product to cart.');
+      toast.error('Failed to add product to cart.');
     },
   });
 
