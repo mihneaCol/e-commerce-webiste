@@ -7,6 +7,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "~/componen
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useState } from "react";
+import { toast } from "sonner"; // Import toast for notifications
+import { useRouter } from 'next/navigation'; // Use next/navigation for redirection
 
 interface CheckoutFormProps {
   onClose: () => void;
@@ -16,7 +18,9 @@ interface CheckoutFormProps {
 const CheckoutForm = ({ onClose, totalPrice }: CheckoutFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
+  const router = useRouter(); // Initialize useRouter for navigation
   const { mutateAsync: createPaymentIntent } = api.payment.createPaymentIntent.useMutation();
+  const { mutateAsync: clearCart } = api.cart.clearCart.useMutation(); // Clear cart mutation
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -48,14 +52,20 @@ const CheckoutForm = ({ onClose, totalPrice }: CheckoutFormProps) => {
 
       if (result.error) {
         console.error(result.error.message);
-        alert(`Payment failed: ${result.error.message}`);
+        toast.error(`Payment failed: ${result.error.message}`);
       } else if (result.paymentIntent?.status === "succeeded") {
-        alert("Payment succeeded!");
-        onClose();
+        toast.success("Payment succeeded!");
+
+        // Clear the cart after successful payment
+        await clearCart();
+        toast.success("Cart cleared!");
+
+        // Redirect to the homepage
+        router.push('/');
       }
     } catch (error) {
       console.error("Error processing payment:", error);
-      alert("An error occurred while processing your payment. Please try again.");
+      toast.error("An error occurred while processing your payment. Please try again.");
     } finally {
       setIsProcessing(false);
     }

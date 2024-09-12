@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { api } from "~/trpc/react"; 
 import { Card } from "~/components/ui/card";
@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Typography } from "~/components/ui/typography";
 import { toast } from "sonner";
 import { Spinner } from "~/components/ui/spinner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import CheckoutForm from "~/components/CheckoutForm";
@@ -17,11 +17,16 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 export default function CartPage() {
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const { data: cartItems, isLoading, isError, refetch } = api.cart.getCart.useQuery();
+  
+  // Trigger a refetch when the component mounts
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const updateQuantityMutation = api.cart.updateQuantity.useMutation({
-    onSuccess: () => {
-      refetch();
+    onSuccess: async () => {
       toast.success('Cart item quantity updated successfully!');
+      await refetch(); // Wait for the refetch to complete
     },
     onError: () => {
       toast.error('Failed to update cart item quantity.');
@@ -29,9 +34,9 @@ export default function CartPage() {
   });
 
   const deleteItemMutation = api.cart.deleteItem.useMutation({
-    onSuccess: () => {
-      refetch();
+    onSuccess: async () => {
       toast.success('Item removed from cart successfully!');
+      await refetch(); // Wait for the refetch to complete
     },
     onError: () => {
       toast.error('Failed to remove item from cart.');

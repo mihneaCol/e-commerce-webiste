@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure, } from "~/server/api/trpc";
 import { carts, products } from "~/server/db/schema";
 import { auth } from "@clerk/nextjs/server";
 
@@ -137,5 +137,25 @@ export const cartRouter = createTRPCRouter({
         .where(eq(carts.userId, user.userId));
 
       return cartItems;
+    }),
+
+    clearCart: publicProcedure.mutation(async ({ ctx }) => {
+      const user = auth();
+    
+      if (!user.userId) {
+        throw new Error("User not authenticated");
+      }
+    
+      // Delete all items in the cart for the authenticated user
+      const result = await ctx.db
+        .delete(carts)
+        .where(eq(carts.userId, user.userId));
+    
+      // You can optionally check if any items were deleted
+      if (result.count === 0) {
+        throw new Error("No items found in cart");
+      }
+    
+      return { success: true };
     }),
 });
